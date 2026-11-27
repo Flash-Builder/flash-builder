@@ -228,7 +228,7 @@ function demoCell(l, v) {
   shuffleBtn.addEventListener("click", () => run(shuffleBtn, { shuffle: true }, "Shuffling…"));
 
   td.append(
-    el("a", { class: "btn small primary-soft", href: `${d.url}?v=${Date.parse(d.builtAt)}`, target: "_blank", rel: "noopener" }, "Open demo"),
+    el("a", { class: "btn small primary-soft", href: `${d.url}${d.url.includes("?") ? "&" : "?"}v=${Date.parse(d.builtAt)}`, target: "_blank", rel: "noopener" }, "Open demo"),
     el("button", { type: "button", class: "btn small", onclick: () => openCustomize(l) }, "Customize…"),
     el("p", { class: "demo-meta" }, `${d.palette} palette, ${d.font}${d.logo ? ", their logo" : ""}${d.brandColor ? ", their color" : ""}. `,
       l.demoLive && l.demoPublicUrl
@@ -633,7 +633,9 @@ $("cz-save").addEventListener("click", async () => {
     });
     const warn = updated.demo?.warnings?.length ? ` Note: ${updated.demo.warnings.join(" ")}` : "";
     $("cz-msg").className = warn ? "form-msg error" : "form-msg";
-    $("cz-msg").textContent = `Saved and rebuilt. Publish it from Published demos to update the live link.${warn}`;
+    $("cz-msg").textContent = document.documentElement.classList.contains("is-demo")
+      ? `Applied. Click Open demo to see it. Changes last until you reload the page.${warn}`
+      : `Saved and rebuilt. Publish it from Published demos to update the live link.${warn}`;
     $("cz-new-photos").checked = false;
     refreshStatus();
     if (state.current) await openSearch(state.current.id, true);

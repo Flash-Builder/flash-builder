@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Loading the demo site…</title>
+<style>body{margin:0;display:grid;place-items:center;min-height:100vh;font:16px system-ui,sans-serif;color:#5D6382;background:#F5F6FA}</style>
+</head>
+<body>
+<p>Loading the demo site…</p>
+<script>
+  // Shows a sample site with the changes made in the live demo's Customize window.
+  // The changes live in the dashboard tab that opened this one; without it, the original site is shown.
+  (async () => {
+    const q = new URLSearchParams(location.search);
+    const lead = q.get("lead") || "";
+    const page = q.get("page") || "index.html";
+    const host = window.parent !== window ? window.parent : window.opener && !window.opener.closed ? window.opener : null;
+    const app = host ? host.FLASH_DEMO_PREVIEW : null;
+    let html = null;
+    try { if (app) html = await app.render(lead, page); } catch (e) { console.error(e); }
+    if (html) {
+      document.open();
+      document.write(html);
+      document.close();
+      return;
+    }
+    // The dashboard tab was closed or reloaded: show the site as it was built
+    const data = await fetch("demo-data.json").then((r) => r.json());
+    const url = data.leads[lead]?.demo?.url;
+    location.replace(url ? url + (page === "index.html" ? "" : page) : "./");
+  })();
+</script>
+</body>
+</html>

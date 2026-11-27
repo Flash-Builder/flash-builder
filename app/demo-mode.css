@@ -6,3 +6,12 @@
 .demo-banner .demo-get:hover { background: var(--ink-2); }
 .is-demo .rail { top: 0; }
 .is-demo .g-attr, .is-demo #export, .is-demo #delete-search, .is-demo #more-btn { display: none !important; }
+
+/* Full-screen viewer for a customized sample site */
+.demo-viewer { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--ink); display: none; }
+.demo-viewer[open] { display: flex; flex-direction: column; }
+.demo-viewer::backdrop { background: rgb(28 33 64 / 0.6); }
+.dv-bar { display: flex; align-items: center; gap: 1rem; padding: 0.55rem 1rem; background: var(--ink); color: #fff; font-size: 0.88rem; font-weight: 600; }
+.dv-bar p { flex: 1; }
+.dv-close { font: inherit; font-weight: 700; padding: 0.4rem 1rem; border-radius: 999px; border: 0; background: var(--flash); color: var(--ink); cursor: pointer; }
+.demo-viewer iframe { flex: 1; width: 100%; border: 0; background: #fff; }
