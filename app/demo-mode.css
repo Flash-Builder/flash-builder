@@ -15,3 +15,12 @@
 .dv-bar p { flex: 1; }
 .dv-close { font: inherit; font-weight: 700; padding: 0.4rem 1rem; border-radius: 999px; border: 0; background: var(--flash); color: var(--ink); cursor: pointer; }
 .demo-viewer iframe { flex: 1; width: 100%; border: 0; background: #fff; }
+
+/* Locked sample businesses: nothing shown but a lock */
+.locked-row td { padding: 0.9rem 1rem; background: repeating-linear-gradient(135deg, #F7F8FC 0 12px, #F1F3F9 12px 24px); }
+.leads tbody tr.locked-row:hover td { background: repeating-linear-gradient(135deg, #F7F8FC 0 12px, #F1F3F9 12px 24px); }
+.locked-inner { display: flex; align-items: center; gap: 0.9rem; }
+.lock-ic { flex: none; width: 2.1rem; height: 2.1rem; padding: 0.45rem; border-radius: 10px; background: var(--ink); fill: none; stroke: var(--flash); stroke-width: 2; stroke-linecap: round; }
+.lock-ic rect { fill: var(--flash); stroke: var(--flash); }
+.locked-t { font-weight: 700; }
+.locked-s { font-size: 0.85rem; color: var(--muted); }

@@ -143,7 +143,32 @@ function expiredRow(l) {
   return row;
 }
 
+// Live demo only: sample businesses that can't be opened are shown as a locked row with nothing inside
+function lockIcon() {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("class", "lock-ic");
+  const body = document.createElementNS(ns, "rect");
+  for (const [k, v] of Object.entries({ x: 4.5, y: 10.5, width: 15, height: 10.5, rx: 2.5 })) body.setAttribute(k, v);
+  const shackle = document.createElementNS(ns, "path");
+  shackle.setAttribute("d", "M8 10.5V7.5a4 4 0 0 1 8 0v3");
+  svg.append(body, shackle);
+  return svg;
+}
+function lockedRow() {
+  return el("tr", { class: "locked-row" },
+    el("td", { colspan: 6 },
+      el("div", { class: "locked-inner" },
+        lockIcon(),
+        el("div", {},
+          el("p", { class: "locked-t" }, "Locked in the live demo"),
+          el("p", { class: "locked-s" }, "Open Crumb & Crust Bakery or Blue Pipe Plumbing to try the demo sites, styles and Customize.")))));
+}
+
 function leadRow(l) {
+  if (l.locked) return lockedRow();
   if (l.expiredAt) return expiredRow(l);
   const v = verdictOf(l);
   const c = l.check || {};
@@ -262,7 +287,7 @@ function renderResults() {
       if (state.filter === "opportunities") return OPPORTUNITY.includes(v) || v === "pending";
       return v === state.filter;
     })
-    .sort((a, b) => order[verdictOf(a)] - order[verdictOf(b)] || (b.check?.score || 0) - (a.check?.score || 0));
+    .sort((a, b) => (a.locked ? 1 : 0) - (b.locked ? 1 : 0) || order[verdictOf(a)] - order[verdictOf(b)] || (b.check?.score || 0) - (a.check?.score || 0));
 
   $("rows").replaceChildren(...shown.map(leadRow));
   $("no-rows").hidden = shown.length > 0;
