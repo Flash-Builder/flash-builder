@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en" data-buy-url="#get">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flash Builder live demo</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="demo-mode.css">
+  <script src="demo-mode.js"></script>
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail" aria-label="Searches">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.2 2 5 13.4h5.6L9.4 22 19 9.8h-5.9z"/></svg></span>
+        <span class="brand-name">Flash Builder</span>
+      </div>
+      <form class="search-form" id="search-form">
+        <h2>New search</h2>
+        <label for="q-type">Business type</label>
+        <input id="q-type" name="type" list="type-ideas" placeholder="Plumbers" required autocomplete="off">
+        <datalist id="type-ideas">
+          <option value="Plumbers"><option value="Electricians"><option value="HVAC contractors"><option value="Auto repair shops">
+          <option value="Bakeries"><option value="Cafes"><option value="Florists"><option value="Hair salons"><option value="Barber shops">
+          <option value="Nail salons"><option value="Dentists"><option value="Landscapers"><option value="House cleaning services">
+          <option value="Tattoo shops"><option value="Gyms"><option value="Yoga studios"><option value="Restaurants"><option value="Roofers">
+          <option value="Photographers"><option value="Phone repair shops"><option value="Pet groomers"><option value="Daycare centers">
+          <option value="Home bakers"><option value="Custom cake makers"><option value="Mobile pet groomers"><option value="Handyman services">
+          <option value="Lawn care services"><option value="Food trucks"><option value="Tailors and alterations"><option value="Shoe repair">
+          <option value="Mobile mechanics"><option value="Pressure washing"><option value="Taquerias"><option value="Laundromats">
+        </datalist>
+        <label for="q-location">Location</label>
+        <input id="q-location" name="location" placeholder="Austin, TX" required autocomplete="off">
+        <label for="q-pages">How many results</label>
+        <select id="q-pages" name="pages">
+          <option value="1">Up to 20 (uses 1 request)</option>
+          <option value="2">Up to 40 (up to 2 requests)</option>
+          <option value="3" selected>Up to 60 (up to 3 requests)</option>
+        </select>
+        <label class="check-row"><input type="checkbox" name="stopEarly" id="q-stop" checked> Stop early once 5 businesses need a website</label>
+        <p class="field-hint">Google can't leave out businesses that already have a website, so each request pays for 20 of them. Small towns, and home-based or mobile trades (home bakers, mobile groomers, handymen), have more businesses without one than big-city shops do.</p>
+        <button class="btn primary" type="submit" id="search-btn">Find businesses</button>
+        <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+      </form>
+
+      <section class="history">
+        <h2>Past searches</h2>
+        <ul id="history" class="history-list"></ul>
+        <p class="muted" id="history-empty">Your searches will appear here.</p>
+      </section>
+    </aside>
+
+    <div class="work">
+      <header class="topbar">
+        <div class="meters">
+          <p class="usage" id="usage" title="Google Places requests used this month. The app stops at the limit so you stay in the free allowance.">Checking Google usage…</p>
+          <p class="usage" id="mail-usage"></p>
+        </div>
+        <div class="publish">
+          <button class="btn small" type="button" id="publish-btn">Published demos</button>
+          <button class="btn ghost small" type="button" id="setup-btn">Setup check</button>
+        </div>
+      </header>
+
+      <main class="content" aria-live="polite">
+      <div id="setup" class="card setup" hidden>
+        <h2>Connect Google to start searching</h2>
+        <p>Add your Google Places API key to the <code>.env</code> file in the Flash Builder folder, then restart the app. <code>README.md</code> walks through it step by step, including how to make sure Google never charges you.</p>
+      </div>
+
+      <div id="empty" class="empty">
+        <h2>Find businesses that need a website</h2>
+        <p>Search a business type and a town. Flash Builder lists every match from Google, checks each website, and sorts out the ones with no site or an outdated one.</p>
+      </div>
+
+      <div id="results" hidden>
+        <div class="results-head">
+          <div>
+            <h1 id="r-title"></h1>
+            <p class="muted" id="r-meta"></p>
+            <p class="g-attr">Business details from <span class="g-maps" translate="no">Google Maps</span></p>
+          </div>
+          <div class="results-actions">
+            <button class="btn" type="button" id="more-btn" hidden>Find 20 more</button>
+            <a class="btn" id="export" href="#">Download CSV</a>
+            <button class="btn ghost" type="button" id="delete-search">Delete search</button>
+          </div>
+        </div>
+
+        <div class="filters" role="toolbar" aria-label="Filter by website status" id="filters"></div>
+
+        <div class="table-wrap">
+          <table class="leads">
+            <thead>
+              <tr>
+                <th scope="col">Business</th>
+                <th scope="col">Website</th>
+                <th scope="col">What's wrong</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Demo site</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p class="muted" id="no-rows" hidden>No businesses match this filter.</p>
+      </div>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="cz-dialog" class="send-dialog cz" aria-labelledby="cz-title">
+    <form method="dialog" id="cz-form" novalidate>
+      <header class="sd-head">
+        <h2 id="cz-title">Customize demo</h2>
+        <button class="btn ghost small" value="cancel" formnovalidate aria-label="Close">Close</button>
+      </header>
+      <p class="muted" id="cz-style"></p>
+
+      <fieldset class="cz-block">
+        <legend>Colors</legend>
+        <div class="swatches" id="cz-palettes" role="radiogroup" aria-label="Color palette"></div>
+        <label class="cz-check"><input type="checkbox" id="cz-use-brand"> Use the logo and brand color from their current website</label>
+        <label class="cz-check"><input type="checkbox" id="cz-own-colors"> Use my own colors</label>
+        <div class="cz-colors" id="cz-color-pickers" hidden>
+          <label>Main color <input type="color" id="cz-primary" value="#1A56DB"></label>
+          <label>Accent color <input type="color" id="cz-accent" value="#F59E0B"></label>
+          <p class="sd-hint">The main color is adjusted darker if needed so button text stays readable.</p>
+        </div>
+        <div class="cz-areas">
+          <h3 class="cz-sub">Color one part of the page</h3>
+          <p class="sd-hint">Give the whole page, the header, the top section or any other part its own background. Text color is picked automatically so it stays readable, unless you set it.</p>
+          <ul class="cz-area-list" id="cz-area-list"></ul>
+          <button class="btn small" type="button" id="cz-area-add">Add a part</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="cz-block">
+        <legend>Pages</legend>
+        <p class="sd-hint">The home page is always there. Add more pages and give each one its own title. Every page gets the same look, colors and effects, with a layout made for its type. They appear in the menu in this order.</p>
+        <ul class="cz-pages" id="cz-pages"></ul>
+        <div class="cz-page-add">
+          <select id="cz-page-type" aria-label="Type of page to add"></select>
+          <button class="btn small" type="button" id="cz-page-add">Add page</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="cz-block">
+        <legend>Top section</legend>
+        <div class="cz-modes">
+          <label class="cz-check"><input type="radio" name="cz-hero" value="photo" checked> Photo with a slow zoom</label>
+          <label class="cz-check"><input type="radio" name="cz-hero" value="video"> Video playing in the background</label>
+          <label class="cz-check"><input type="radio" name="cz-hero" value="animated"> Animated artwork, no photo</label>
+        </div>
+        <div class="cz-uploads" id="cz-video-wrap" hidden>
+          <p class="sd-hint" id="cz-video-source"></p>
+          <div class="cz-video-row" id="cz-video-row" hidden><video id="cz-video-preview" muted loop playsinline aria-label="The business's video"></video><button class="btn ghost small" type="button" id="cz-video-rm">Remove video</button></div>
+          <label class="btn small" for="cz-video-file" id="cz-video-add">Add the business's video…</label>
+          <input type="file" id="cz-video-file" accept="video/mp4,video/webm" hidden>
+          <p class="sd-hint">MP4 or WebM, up to 30 MB. A 10 to 20 second clip works best. It plays muted on a loop, and visitors who turn off motion see a still photo instead.</p>
+        </div>
+      </fieldset>
+
+      <fieldset class="cz-block">
+        <legend>Photos</legend>
+        <label class="cz-check"><input type="checkbox" id="cz-photos-on" checked> Show a photo section</label>
+        <p class="sd-hint" id="cz-photo-source"></p>
+        <label class="cz-check" id="cz-new-photos-wrap"><input type="checkbox" id="cz-new-photos"> Pick different stock photos</label>
+        <div class="cz-uploads">
+          <p class="cz-sub">The business's own photos <span class="muted">(replace the stock ones, up to 6)</span></p>
+          <ul class="thumbs" id="cz-thumbs"></ul>
+          <label class="btn small" for="cz-file">Add photos…</label>
+          <input type="file" id="cz-file" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <p class="sd-hint">Only use photos the business sent you or agreed you can use.</p>
+        </div>
+      </fieldset>
+
+      <fieldset class="cz-block">
+        <legend>Reviews</legend>
+        <div class="cz-modes">
+          <label class="cz-check"><input type="radio" name="cz-rmode" value="example" checked> Example reviews (clearly marked "Example")</label>
+          <label class="cz-check"><input type="radio" name="cz-rmode" value="real"> Real reviews from their customers</label>
+          <label class="cz-check"><input type="radio" name="cz-rmode" value="off"> No reviews section</label>
+        </div>
+        <div id="cz-real" hidden>
+          <p class="sd-hint">Only add reviews the business gave you, and tick consent for each. Invented reviews presented as real are illegal in the US. Reviews without consent are left off the page.</p>
+          <ol class="cz-reviews" id="cz-reviews"></ol>
+          <button class="btn small" type="button" id="cz-add-review">Add a review</button>
+        </div>
+      </fieldset>
+
+      <p class="form-msg" id="cz-msg" role="status" aria-live="polite"></p>
+      <footer class="sd-actions">
+        <button class="btn primary" type="button" id="cz-save">Save and rebuild demo</button>
+        <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="setup-dialog" class="send-dialog setup-dlg" aria-labelledby="setup-title">
+    <form method="dialog" novalidate>
+      <header class="sd-head">
+        <h2 id="setup-title">Setup check</h2>
+        <button class="btn ghost small" value="cancel" formnovalidate aria-label="Close">Close</button>
+      </header>
+      <p class="muted">Flash Builder tries each account in your <code>.env</code> file once. It doesn't use your Google allowance or send any email. After changing <code>.env</code>, restart the app and check again.</p>
+      <p class="form-msg" id="setup-msg" role="status" aria-live="polite"></p>
+      <ul class="setup-list" id="setup-list"></ul>
+      <footer class="sd-actions">
+        <button class="btn primary" type="button" id="setup-again">Check again</button>
+        <button class="btn" value="cancel" formnovalidate>Close</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="pub-dialog" class="send-dialog pub" aria-labelledby="pub-title">
+    <form method="dialog" id="pub-form" novalidate>
+      <header class="sd-head">
+        <h2 id="pub-title">Published demos</h2>
+        <button class="btn ghost small" value="cancel" formnovalidate aria-label="Close">Close</button>
+      </header>
+      <p class="muted">Tick the demos to put online or update, then publish. Demos you don't tick stay online exactly as they are. Each demo has its own link; the site's front page doesn't list them, so only people you send a link to can find theirs.</p>
+      <div class="pub-tools">
+        <button class="btn small" type="button" id="pub-pick-waiting">Tick all waiting</button>
+        <button class="btn ghost small" type="button" id="pub-pick-none">Untick all</button>
+      </div>
+      <ul class="pub-list" id="pub-list"></ul>
+      <p class="form-msg" id="pub-msg" role="status" aria-live="polite"></p>
+      <footer class="sd-actions">
+        <button class="btn primary" type="button" id="pub-go" disabled>Publish selected</button>
+        <button class="btn" value="cancel" formnovalidate>Close</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="send-dialog" class="send-dialog" aria-labelledby="sd-title">
+    <form method="dialog" id="send-form" novalidate>
+      <header class="sd-head">
+        <h2 id="sd-title">Email</h2>
+        <button class="btn ghost small" value="cancel" formnovalidate aria-label="Close">Close</button>
+      </header>
+      <ul class="sd-warnings" id="sd-warnings"></ul>
+      <div class="sd-grid">
+        <label for="sd-from">From</label>
+        <input id="sd-from" readonly>
+        <label for="sd-to">To</label>
+        <div>
+          <input id="sd-to" type="email" list="sd-emails" autocomplete="off" placeholder="owner@business.com">
+          <datalist id="sd-emails"></datalist>
+        </div>
+        <label for="sd-subject">Subject</label>
+        <input id="sd-subject" maxlength="200">
+      </div>
+      <label class="sd-label" for="sd-text">Message</label>
+      <textarea id="sd-text" rows="15"></textarea>
+      <p class="sd-hint">Edit anything you like. Keep the last two lines: US law needs your postal address and the opt-out in every email.</p>
+      <label class="sd-repeat" id="sd-repeat-wrap" hidden><input type="checkbox" id="sd-repeat"> Send anyway (this is a follow-up)</label>
+      <p class="form-msg" id="sd-msg" role="status" aria-live="polite"></p>
+      <footer class="sd-actions">
+        <button class="btn primary" type="button" id="sd-send">Send email</button>
+        <button class="btn" type="button" id="sd-copy">Copy call or text script</button>
+        <a class="btn" id="sd-demo" target="_blank" rel="noopener" hidden>Open live demo</a>
+        <button class="btn ghost danger" type="button" id="sd-optout">Do not contact</button>
+      </footer>
+    </form>
+  </dialog>
+</body>
+</html>

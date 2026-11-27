@@ -1,0 +1,8 @@
+/* Live demo only: the banner, and hiding things that don't apply to made-up sample data */
+.demo-banner { position: relative; z-index: 30; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 0.6rem 1.25rem; background: var(--flash); color: var(--ink); font-size: 0.88rem; font-weight: 600; }
+.demo-banner p { flex: 1 1 22rem; }
+.demo-banner a { color: var(--ink); font-weight: 700; }
+.demo-banner .demo-get { padding: 0.35rem 0.85rem; border-radius: 999px; background: var(--ink); color: #fff; text-decoration: none; }
+.demo-banner .demo-get:hover { background: var(--ink-2); }
+.is-demo .rail { top: 0; }
+.is-demo .g-attr, .is-demo #export, .is-demo #delete-search, .is-demo #more-btn { display: none !important; }
