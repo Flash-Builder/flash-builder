@@ -21,6 +21,9 @@
     let html = null;
     try { if (app) html = await app.render(lead, page); } catch (e) { console.error(e); }
     if (html) {
+      // Replace this page only once it has finished loading. While it's still loading, the browser
+      // ignores document.open() and would add the site inside this "Loading…" page instead.
+      if (document.readyState !== "complete") await new Promise((r) => addEventListener("load", r, { once: true }));
       document.open();
       document.write(html);
       document.close();

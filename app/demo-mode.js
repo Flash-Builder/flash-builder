@@ -4,7 +4,7 @@
 // rebuilt in the browser. Everything is kept in memory only, so reloading the page resets it.
 (() => {
   // The build's version tag (from this script's own address), so updated files aren't served from cache
-  const V = (document.currentScript?.src.split("?v=")[1] || "").replace(/[^w]/g, "");
+  const V = (document.currentScript?.src.split("?v=")[1] || "").replace(/[^a-z0-9]/gi, "");
   const DATA_URL = `demo-data.json?v=${V}`;
   let dataPromise = null;
   const load = () => (dataPromise ||= fetch(DATA_URL).then((r) => r.json()));
@@ -19,7 +19,7 @@
 
   // ---------- rebuilding a site in the browser ----------
   let engine = null;
-  const loadEngine = () => (engine ||= Promise.all([import(`./engine/render.js?v=${V}`), import(`./engine/variation.js?v=${V}`), import(`./engine/areas.js?v=${V}`), import(`./engine/pages.js?v=${V}`)])
+  const loadEngine = () => (engine ||= Promise.all([import(`./engine/${V}/render.js`), import(`./engine/${V}/variation.js`), import(`./engine/${V}/areas.js`), import(`./engine/${V}/pages.js`)])
     .then(([render, variation, areas, pages]) => ({ render, variation, areas, pages })));
   const renderCache = {};
   const loadRender = (leadId, style) => (renderCache[`${leadId}-${style}`] ||= realFetch(`render/${leadId}-${style}.json?v=${V}`).then((r) => (r.ok ? r.json() : null)));
@@ -66,7 +66,7 @@
       const page = file && file !== "index.html" ? data.pages.find((p) => p.file === file) || null : null;
       let html = m.render.renderDemo(data, page);
       // Links between the site's pages stay inside the preview
-      for (const f of ["index.html", ...data.pages.map((p) => p.file)]) html = html.split(`href="${f}"`).join(`href="preview.html?lead=${encodeURIComponent(leadId)}&amp;page=${encodeURIComponent(f)}"`);
+      for (const f of ["index.html", ...data.pages.map((p) => p.file)]) html = html.split(`href="${f}"`).join(`href="preview.html?v=${V}&amp;lead=${encodeURIComponent(leadId)}&amp;page=${encodeURIComponent(f)}"`);
       return html;
     },
   };
@@ -112,7 +112,7 @@
     return {
       ...variant,
       styleChoice: session.style[leadId] ? "picked" : "auto",
-      url: customized ? `preview.html?lead=${encodeURIComponent(leadId)}` : variant.url,
+      url: customized ? `preview.html?v=${V}&lead=${encodeURIComponent(leadId)}` : variant.url,
       builtAt: session.builtAt[leadId] || variant.builtAt,
     };
   }
